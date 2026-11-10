@@ -1,12 +1,10 @@
-import { useState } from "react";
 import { QUESTS, SIDE_QUESTS } from "../data";
 import type { Quest as QuestT } from "../types";
 import Reveal from "./Reveal";
 
 function Quest({ q, i }: { q: QuestT; i: number }) {
-  const [open, setOpen] = useState(false);
   return (
-    <Reveal as="article" className={`q pxb ${open ? "open" : ""}`}>
+    <Reveal as="article" className="q pxb">
       <div className="in">
         <div className="top">
           <div className="lab">QUEST 0{i + 1}</div>
@@ -20,9 +18,6 @@ function Quest({ q, i }: { q: QuestT; i: number }) {
         <div className="act">
           {q.l && <a className="btn" href={q.l} target="_blank" rel="noopener noreferrer">{q.n}</a>}
           {q.c && <a className={`btn${q.l ? " alt" : ""}`} href={q.c} target="_blank" rel="noopener noreferrer">CODE</a>}
-          <button className="btn alt more" type="button" aria-expanded={open} onClick={() => setOpen(!open)}>
-            {open ? "LESS ▲" : "MORE ▼"}
-          </button>
         </div>
       </div>
     </Reveal>
@@ -39,7 +34,7 @@ export default function Projects() {
             <h2>PROJECTS</h2>
           </div>
         </div>
-        <p className="hint">Eight main quests, then the side quests below. Tap MORE on a card for the full story.</p>
+        <p className="hint">Eight main quests, then the side quests below.</p>
         <div className="grid">
           {QUESTS.map((q, i) => <Quest key={q.t} q={q} i={i} />)}
         </div>

@@ -435,15 +435,8 @@ h1 {
 }
 
 .q p.d {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
   font-size: 22px;
-}
-
-.q.open p.d {
-  display: block;
+  line-height: 1.35;
 }
 
 .rw {
