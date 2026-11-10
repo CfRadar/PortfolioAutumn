@@ -43,7 +43,6 @@ export const SIDE_QUESTS: SideQuest[] = [
   { t: "Terminal Warrior", d: "Terminal game engine in C++17 with a state machine, enemy spawning and audio triggers.", g: ["C++17", "CMake"], l: GH + "Keyboard-Warrior", n: "CODE" },
   { t: "SheCanFoundation", d: "Non-profit site with scroll-driven canvas animation and responsive storytelling.", g: ["React 19", "Framer Motion"], l: GH + "SheCanFoundation-Project", n: "CODE" },
   { t: "GestureControl", d: "Hand-landmark tracking that maps gestures to keystrokes and mouse moves.", g: ["Python", "OpenCV", "MediaPipe"] },
-  { t: "Interactive 3D Portfolio", d: "Three.js portfolio with shaders and a project showcase.", g: ["Three.js", "R3F"], l: "https://portfolio-taupe-eight-10.vercel.app/", n: "OPEN" },
 ];
 
 export const SKILLS: Record<string, string[]> = {

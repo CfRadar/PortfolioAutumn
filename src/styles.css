@@ -355,79 +355,6 @@ h1 {
   50% { opacity: 0.35; }
 }
 
-/* Interactive RPG Dialogue Box */
-.dlg {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 22px;
-  margin: 0 auto;
-  width: min(840px, calc(100% - 36px));
-  background: rgba(29, 16, 32, 0.96);
-  padding: 22px 26px 16px;
-  min-height: 112px;
-  --bd: var(--cr);
-  cursor: pointer;
-  user-select: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.dlg:hover {
-  --bd: var(--am);
-  transform: translateY(-2px);
-}
-
-.dlg-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-}
-
-.dlg b {
-  font: 10px var(--px);
-  background: var(--am);
-  color: var(--plum);
-  padding: 6px 10px;
-  letter-spacing: 1px;
-}
-
-.dlg-step {
-  font: 9px var(--px);
-  color: var(--mu);
-  background: rgba(43, 27, 46, 0.85);
-  padding: 4px 8px;
-  border: 2px solid var(--bk);
-}
-
-.dlg p {
-  margin: 8px 0 10px;
-  font-size: 26px;
-  line-height: 1.25;
-  color: var(--cr);
-  min-height: 58px;
-}
-
-.dlg-foot {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 10px;
-}
-
-.dlg-hint {
-  font: 9px var(--px);
-  color: var(--or);
-  letter-spacing: 0.5px;
-}
-
-.dlg i {
-  font: 12px var(--px);
-  color: var(--am);
-  font-style: normal;
-  animation: bl 0.8s steps(2) infinite;
-}
-
 /* Projects Section (Quest Board) */
 #projects {
   background: var(--plum);
@@ -1113,19 +1040,20 @@ footer {
   left: 0;
   pointer-events: none;
   z-index: 99999;
+  will-change: transform;
+}
+
+.maple-cursor-icon {
+  width: 28px;
+  height: 28px;
   transform-origin: 14px 14px;
-  transition: filter 0.15s ease;
+  transition: transform 0.15s ease, filter 0.15s ease;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 
-.maple-cursor.hovered {
+.maple-cursor.hovered .maple-cursor-icon {
   filter: drop-shadow(0 0 8px #F2A541) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
-  animation: leafFlutter 1.2s infinite ease-in-out;
-}
-
-@keyframes leafFlutter {
-  0%, 100% { transform: scale(1.2) rotate(-10deg); }
-  50% { transform: scale(1.2) rotate(14deg); }
+  transform: scale(1.22);
 }
 
 /* Scroll reveal helpers */

@@ -23,11 +23,15 @@ interface Particle {
 const AUTUMN_COLORS = ["#D9622B", "#A8321F", "#F2A541", "#E0B83A", "#C2563A", "#FFF7D6"];
 
 export default function MapleCursor() {
-  const [enabled, setEnabled] = useState(false);
+  const [enabled] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !window.matchMedia("(pointer: coarse)").matches;
+  });
   const [hovered, setHovered] = useState(false);
   const cursorRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const hasInit = useRef(false);
 
   const pos = useRef({
     x: -100,
@@ -39,11 +43,27 @@ export default function MapleCursor() {
   });
 
   useEffect(() => {
-    if (window.matchMedia("(pointer: coarse)").matches) return;
-    setEnabled(true);
+    if (!enabled) return;
     document.documentElement.classList.add("custom-cursor-active");
 
+    const cv = canvasRef.current;
+    if (cv) {
+      cv.width = window.innerWidth;
+      cv.height = window.innerHeight;
+    }
+
     const onMove = (e: PointerEvent) => {
+      // Clean initial mouse entry: snap to mouse without giant false distance leap
+      if (!hasInit.current) {
+        hasInit.current = true;
+        pos.current.x = e.clientX;
+        pos.current.y = e.clientY;
+        pos.current.targetX = e.clientX;
+        pos.current.targetY = e.clientY;
+        pos.current.distMoved = 0;
+        return;
+      }
+
       const dx = e.clientX - pos.current.targetX;
       const dy = e.clientY - pos.current.targetY;
       const dist = Math.hypot(dx, dy);
@@ -51,43 +71,45 @@ export default function MapleCursor() {
       pos.current.targetX = e.clientX;
       pos.current.targetY = e.clientY;
 
-      const targetAngle = Math.max(-30, Math.min(30, dx * 1.6));
-      pos.current.angle += (targetAngle - pos.current.angle) * 0.25;
+      const targetAngle = Math.max(-28, Math.min(28, dx * 1.5));
+      pos.current.angle += (targetAngle - pos.current.angle) * 0.28;
 
       pos.current.distMoved += dist;
 
-      // Shed falling particles as cursor moves through space
-      if (pos.current.distMoved > 16) {
-        pos.current.distMoved = 0;
-        const count = Math.random() < 0.65 ? 1 : 2;
-        for (let i = 0; i < count; i++) {
-          if (particlesRef.current.length > 130) break;
-          particlesRef.current.push({
-            x: e.clientX + (Math.random() - 0.5) * 10,
-            y: e.clientY + (Math.random() - 0.5) * 10,
-            // Inherit reverse momentum & dispersion
-            vx: -dx * 0.08 + (Math.random() - 0.5) * 0.9,
-            vy: -dy * 0.06 + Math.random() * 0.6,
-            gravity: 0.045 + Math.random() * 0.04,
-            drag: 0.985,
-            rot: Math.random() * 360,
-            vRot: (Math.random() - 0.5) * 10,
-            swayPhase: Math.random() * Math.PI * 2,
-            swaySpeed: 0.03 + Math.random() * 0.04,
-            flutterStrength: 0.35 + Math.random() * 0.45,
-            size: Math.random() < 0.4 ? 4 : Math.random() < 0.75 ? 3 : 2,
-            color: AUTUMN_COLORS[Math.floor(Math.random() * AUTUMN_COLORS.length)],
-            shape: Math.random() < 0.5 ? "leaf" : Math.random() < 0.8 ? "flake" : "ember",
-            opacity: 0.9 + Math.random() * 0.1,
-            decay: 0.009 + Math.random() * 0.012,
-          });
-        }
+      // Continuous ribbon trail: spawn particles interpolated along the movement path
+      while (pos.current.distMoved >= 10) {
+        pos.current.distMoved -= 10;
+        if (particlesRef.current.length > 220) break;
+
+        const frac = dist > 0 ? Math.min(1, pos.current.distMoved / dist) : 0;
+        const spawnX = e.clientX - dx * frac + (Math.random() - 0.5) * 8;
+        const spawnY = e.clientY - dy * frac + (Math.random() - 0.5) * 8;
+
+        particlesRef.current.push({
+          x: spawnX,
+          y: spawnY,
+          vx: -dx * 0.05 + (Math.random() - 0.5) * 0.7,
+          vy: -dy * 0.04 + Math.random() * 0.5,
+          gravity: 0.038 + Math.random() * 0.03,
+          drag: 0.988,
+          rot: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 8,
+          swayPhase: Math.random() * Math.PI * 2,
+          swaySpeed: 0.025 + Math.random() * 0.03,
+          flutterStrength: 0.35 + Math.random() * 0.4,
+          size: Math.random() < 0.4 ? 4 : Math.random() < 0.75 ? 3 : 2,
+          color: AUTUMN_COLORS[Math.floor(Math.random() * AUTUMN_COLORS.length)],
+          shape: Math.random() < 0.55 ? "leaf" : Math.random() < 0.82 ? "flake" : "ember",
+          opacity: 0.95,
+          // Lingers 2.5 - 3.2 seconds floating on the wind
+          decay: 0.005 + Math.random() * 0.005,
+        });
       }
 
       const target = e.target as HTMLElement | null;
       if (target) {
         const isInteractive = Boolean(
-          target.closest("a, button, [role='button'], [role='tab'], .q, .sq, .slot, .dlg, .ev, .cd, input")
+          target.closest("a, button, [role='button'], [role='tab'], .q, .sq, .slot, .ev, .cd, input")
         );
         setHovered(isInteractive);
       }
@@ -97,27 +119,27 @@ export default function MapleCursor() {
 
     const onClick = (e: MouseEvent) => {
       // Explosive click burst of leaves caught by the wind
-      const burstCount = 11;
+      const burstCount = 14;
       for (let i = 0; i < burstCount; i++) {
         const rad = (Math.PI * 2 * i) / burstCount + (Math.random() - 0.5) * 0.4;
-        const spd = 1.6 + Math.random() * 2.6;
+        const spd = 1.8 + Math.random() * 2.8;
         particlesRef.current.push({
           x: e.clientX,
           y: e.clientY,
           vx: Math.cos(rad) * spd,
-          vy: Math.sin(rad) * spd - 1.4,
-          gravity: 0.05 + Math.random() * 0.04,
-          drag: 0.97,
+          vy: Math.sin(rad) * spd - 1.2,
+          gravity: 0.045 + Math.random() * 0.035,
+          drag: 0.975,
           rot: Math.random() * 360,
-          vRot: (Math.random() - 0.5) * 16,
+          vRot: (Math.random() - 0.5) * 14,
           swayPhase: Math.random() * Math.PI * 2,
-          swaySpeed: 0.04 + Math.random() * 0.04,
-          flutterStrength: 0.4 + Math.random() * 0.5,
-          size: Math.random() < 0.5 ? 4 : 3,
+          swaySpeed: 0.035 + Math.random() * 0.035,
+          flutterStrength: 0.4 + Math.random() * 0.4,
+          size: Math.random() < 0.55 ? 4 : 3,
           color: AUTUMN_COLORS[Math.floor(Math.random() * AUTUMN_COLORS.length)],
-          shape: Math.random() < 0.6 ? "leaf" : "ember",
+          shape: Math.random() < 0.65 ? "leaf" : "ember",
           opacity: 1,
-          decay: 0.013 + Math.random() * 0.01,
+          decay: 0.007 + Math.random() * 0.006,
         });
       }
     };
@@ -135,46 +157,52 @@ export default function MapleCursor() {
       pos.current.x += (pos.current.targetX - pos.current.x) * 0.8;
       pos.current.y += (pos.current.targetY - pos.current.y) * 0.8;
 
-      if (cursorRef.current) {
+      if (cursorRef.current && hasInit.current) {
         cursorRef.current.style.transform = `translate3d(${pos.current.x - 14}px, ${pos.current.y - 14}px, 0) rotate(${pos.current.angle}deg)`;
       }
 
-      // Idle shedding while hovering
+      // Gentle continuous idle shedding so the trail never completely dies while resting
       idleTimer += dt;
-      if (idleTimer > 8 && pos.current.targetX > 0 && particlesRef.current.length < 110) {
+      if (idleTimer > 7 && hasInit.current && particlesRef.current.length < 180) {
         idleTimer = 0;
         particlesRef.current.push({
-          x: pos.current.x + (Math.random() - 0.5) * 10,
+          x: pos.current.x + (Math.random() - 0.5) * 8,
           y: pos.current.y + 12,
           vx: (Math.random() - 0.5) * 0.35,
-          vy: 0.2 + Math.random() * 0.35,
-          gravity: 0.035,
-          drag: 0.985,
+          vy: 0.18 + Math.random() * 0.35,
+          gravity: 0.032,
+          drag: 0.988,
           rot: Math.random() * 360,
-          vRot: (Math.random() - 0.5) * 6,
+          vRot: (Math.random() - 0.5) * 5,
           swayPhase: Math.random() * Math.PI * 2,
-          swaySpeed: 0.025,
-          flutterStrength: 0.38,
+          swaySpeed: 0.022,
+          flutterStrength: 0.36,
           size: Math.random() < 0.5 ? 3 : 2,
           color: AUTUMN_COLORS[Math.floor(Math.random() * AUTUMN_COLORS.length)],
           shape: "flake",
           opacity: 0.85,
-          decay: 0.012,
+          decay: 0.006 + Math.random() * 0.005,
         });
       }
 
-      const cv = canvasRef.current;
-      if (cv) {
-        const ctx = cv.getContext("2d");
+      const activeCv = canvasRef.current;
+      if (activeCv) {
+        // Guarantee canvas always fills viewport window without 300x150 clipping
+        if (activeCv.width !== window.innerWidth || activeCv.height !== window.innerHeight) {
+          activeCv.width = window.innerWidth;
+          activeCv.height = window.innerHeight;
+        }
+
+        const ctx = activeCv.getContext("2d");
         if (ctx) {
-          ctx.clearRect(0, 0, cv.width, cv.height);
+          ctx.clearRect(0, 0, activeCv.width, activeCv.height);
 
           particlesRef.current.forEach((p) => {
             // Apply imaginary wind physics!
             const wind = getWind(p.x, p.y, currentTime);
 
-            p.vx += (wind.windX - p.vx) * 0.04 * dt;
-            p.vy += (wind.windY + p.gravity * 16 - p.vy) * 0.038 * dt;
+            p.vx += (wind.windX - p.vx) * 0.038 * dt;
+            p.vy += (wind.windY + p.gravity * 16 - p.vy) * 0.036 * dt;
 
             p.swayPhase += p.swaySpeed * dt;
             const flutter = Math.sin(p.swayPhase) * p.flutterStrength;
@@ -208,8 +236,11 @@ export default function MapleCursor() {
             }
           });
 
+          // Cull particles only once fully out of viewport bounds
+          const W = activeCv.width;
+          const H = activeCv.height;
           particlesRef.current = particlesRef.current.filter(
-            (p) => p.opacity > 0 && p.y < cv.height + 20 && p.x < cv.width + 40
+            (p) => p.opacity > 0 && p.y > -40 && p.y < H + 40 && p.x > -40 && p.x < W + 40
           );
         }
       }
@@ -223,7 +254,6 @@ export default function MapleCursor() {
         canvasRef.current.height = window.innerHeight;
       }
     };
-    onResize();
     addEventListener("resize", onResize);
     raf = requestAnimationFrame(loop);
 
@@ -234,7 +264,7 @@ export default function MapleCursor() {
       removeEventListener("resize", onResize);
       cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [enabled]);
 
   if (!enabled) return null;
 
@@ -255,55 +285,57 @@ export default function MapleCursor() {
         className={`maple-cursor ${hovered ? "hovered" : ""}`}
         aria-hidden="true"
       >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {/* Stem */}
-          <rect x="11" y="18" width="2" height="5" fill="#4A2F1F" />
-          <rect x="10" y="20" width="1" height="2" fill="#2B1B2E" />
+        <div className="maple-cursor-icon">
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Stem */}
+            <rect x="11" y="18" width="2" height="5" fill="#4A2F1F" />
+            <rect x="10" y="20" width="1" height="2" fill="#2B1B2E" />
 
-          {/* Top lobe */}
-          <rect x="10" y="2" width="4" height="4" fill="#A8321F" />
-          <rect x="11" y="1" width="2" height="2" fill="#D9622B" />
-          <rect x="11" y="0" width="2" height="1" fill="#F2A541" />
+            {/* Top lobe */}
+            <rect x="10" y="2" width="4" height="4" fill="#A8321F" />
+            <rect x="11" y="1" width="2" height="2" fill="#D9622B" />
+            <rect x="11" y="0" width="2" height="1" fill="#F2A541" />
 
-          {/* Main blade */}
-          <rect x="8" y="5" width="8" height="5" fill="#D9622B" />
-          <rect x="9" y="6" width="6" height="4" fill="#F2A541" />
-          <rect x="11" y="5" width="2" height="9" fill="#FFF7D6" />
+            {/* Main blade */}
+            <rect x="8" y="5" width="8" height="5" fill="#D9622B" />
+            <rect x="9" y="6" width="6" height="4" fill="#F2A541" />
+            <rect x="11" y="5" width="2" height="9" fill="#FFF7D6" />
 
-          {/* Left lobe */}
-          <rect x="3" y="9" width="3" height="3" fill="#A8321F" />
-          <rect x="2" y="10" width="2" height="2" fill="#D9622B" />
-          <rect x="5" y="8" width="4" height="6" fill="#D9622B" />
-          <rect x="6" y="9" width="3" height="3" fill="#F2A541" />
+            {/* Left lobe */}
+            <rect x="3" y="9" width="3" height="3" fill="#A8321F" />
+            <rect x="2" y="10" width="2" height="2" fill="#D9622B" />
+            <rect x="5" y="8" width="4" height="6" fill="#D9622B" />
+            <rect x="6" y="9" width="3" height="3" fill="#F2A541" />
 
-          {/* Right lobe */}
-          <rect x="18" y="9" width="3" height="3" fill="#A8321F" />
-          <rect x="20" y="10" width="2" height="2" fill="#D9622B" />
-          <rect x="15" y="8" width="4" height="6" fill="#D9622B" />
-          <rect x="15" y="9" width="3" height="3" fill="#F2A541" />
+            {/* Right lobe */}
+            <rect x="18" y="9" width="3" height="3" fill="#A8321F" />
+            <rect x="20" y="10" width="2" height="2" fill="#D9622B" />
+            <rect x="15" y="8" width="4" height="6" fill="#D9622B" />
+            <rect x="15" y="9" width="3" height="3" fill="#F2A541" />
 
-          {/* Lower Lobes */}
-          <rect x="5" y="14" width="4" height="3" fill="#A8321F" />
-          <rect x="4" y="15" width="2" height="2" fill="#8F2418" />
-          <rect x="15" y="14" width="4" height="3" fill="#A8321F" />
-          <rect x="18" y="15" width="2" height="2" fill="#8F2418" />
+            {/* Lower Lobes */}
+            <rect x="5" y="14" width="4" height="3" fill="#A8321F" />
+            <rect x="4" y="15" width="2" height="2" fill="#8F2418" />
+            <rect x="15" y="14" width="4" height="3" fill="#A8321F" />
+            <rect x="18" y="15" width="2" height="2" fill="#8F2418" />
 
-          {/* Central Heart */}
-          <rect x="9" y="10" width="6" height="7" fill="#D9622B" />
-          <rect x="10" y="11" width="4" height="5" fill="#F2A541" />
-          <rect x="11" y="12" width="2" height="4" fill="#E0B83A" />
+            {/* Central Heart */}
+            <rect x="9" y="10" width="6" height="7" fill="#D9622B" />
+            <rect x="10" y="11" width="4" height="5" fill="#F2A541" />
+            <rect x="11" y="12" width="2" height="4" fill="#E0B83A" />
 
-          {/* Outline / Shading */}
-          <rect x="9" y="17" width="6" height="2" fill="#7A321F" />
-          <rect x="7" y="14" width="2" height="2" fill="#7A321F" />
-          <rect x="15" y="14" width="2" height="2" fill="#7A321F" />
-        </svg>
+            {/* Outline / Shading */}
+            <rect x="9" y="17" width="6" height="2" fill="#7A321F" />
+            <rect x="7" y="14" width="2" height="2" fill="#7A321F" />
+            <rect x="15" y="14" width="2" height="2" fill="#7A321F" />
+          </svg>
+        </div>
       </div>
     </>
   );
