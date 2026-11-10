@@ -14,13 +14,7 @@ import { autumnAudio } from "./audio";
 
 export default function App() {
   useEffect(() => {
-    let explicitlyMuted = false;
-    try {
-      explicitlyMuted = localStorage.getItem("autumn_bgm_enabled") === "false";
-    } catch {}
-    if (!explicitlyMuted) {
-      autumnAudio.start().catch(() => {});
-    }
+    autumnAudio.ensureRunning();
   }, []);
 
   return (

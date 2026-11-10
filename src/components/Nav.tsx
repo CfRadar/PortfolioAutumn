@@ -48,6 +48,8 @@ export default function Nav() {
               {label}
             </a>
           ))}
+        </div>
+        <div className="nav-actions">
           <SoundButton />
         </div>
       </nav>

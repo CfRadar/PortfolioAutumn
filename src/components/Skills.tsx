@@ -12,8 +12,8 @@ interface SkillItem {
 
 export default function Skills() {
   const categories = Object.keys(SKILLS);
-  const tabs = ["ALL", ...categories];
-  const [tab, setTab] = useState("ALL");
+  const tabs = [...categories, "ALL"];
+  const [tab, setTab] = useState(categories[0]);
 
   const allSkills: SkillItem[] = useMemo(() => {
     let colorIdx = 0;

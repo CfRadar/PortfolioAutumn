@@ -16,11 +16,7 @@ function EmailDispatch() {
     <div className="email-dispatch pxb">
       <div className="email-top">
         <span className="email-tag">DIRECT EMAIL</span>
-        {copied ? (
-          <span className="email-copied-pill">COPIED TO CLIPBOARD!</span>
-        ) : (
-          <span className="email-status-pill">● COMPOSE READY</span>
-        )}
+        {copied && <span className="email-copied-pill">COPIED TO CLIPBOARD!</span>}
       </div>
 
       <a

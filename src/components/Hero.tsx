@@ -2,12 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { startScene } from "../scene";
 import { REDUCE } from "../lib";
 import { DIALOGUES } from "../data";
-import { autumnAudio } from "../audio";
 
-const goProjects = (): void => {
-  autumnAudio.start();
+const goProjects = (): void =>
   document.getElementById("projects")?.scrollIntoView({ behavior: REDUCE ? "auto" : "smooth" });
-};
 
 export default function Hero() {
   const host = useRef<HTMLElement>(null);

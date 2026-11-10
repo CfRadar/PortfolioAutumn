@@ -131,15 +131,13 @@ nav {
   inset: 0 0 auto;
   z-index: 30;
   height: 56px;
-  padding: env(safe-area-inset-top, 0) clamp(16px, 3vw, 40px) 0;
+  padding: env(safe-area-inset-top, 0) clamp(12px, 2.5vw, 36px) 0;
   background: var(--plum);
   border-bottom: 4px solid var(--bk);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  gap: 10px;
 }
 
 .brand-wrap {
@@ -173,7 +171,12 @@ nav {
   display: flex;
   align-items: center;
   gap: 4px;
-  flex: none;
+  flex: 1;
+  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 4px;
 }
 
 .nav-links a {
@@ -183,11 +186,18 @@ nav {
   padding: 10px 10px;
   flex: none;
   transition: background 0.1s ease, color 0.1s ease;
+  white-space: nowrap;
 }
 
 .nav-links a:hover, .nav-links a.on {
   background: var(--or);
   color: var(--plum);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  flex: none;
 }
 
 /* Compact Sound Toggle Icon */
@@ -1148,11 +1158,75 @@ footer {
 }
 
 @media (max-width: 760px) {
+  nav {
+    height: 50px;
+    padding: env(safe-area-inset-top, 0) 10px 0;
+    gap: 6px;
+  }
+  .brand-badge {
+    font-size: 10px;
+    padding: 5px 6px;
+  }
+  .nav-links {
+    justify-content: flex-start;
+    gap: 2px;
+  }
+  .nav-links a {
+    font-size: 8px;
+    padding: 8px 6px;
+  }
+  .sound-toggle {
+    width: 28px;
+    height: 28px;
+    margin-left: 2px;
+  }
+  .sound-toggle svg {
+    width: 14px;
+    height: 14px;
+  }
   .custom-cursor-active, .custom-cursor-active * {
     cursor: auto !important;
   }
   .maple-cursor {
     display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  nav {
+    height: 48px;
+    padding: env(safe-area-inset-top, 0) 6px 0;
+    gap: 4px;
+  }
+  .nav-links a {
+    font-size: 7.5px;
+    padding: 6px 4px;
+  }
+  .wrap {
+    padding: 56px 14px;
+  }
+  .slots {
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+    gap: 10px;
+    padding: 14px;
+  }
+  .slot-box {
+    width: 52px;
+    height: 46px;
+    margin-bottom: 4px;
+  }
+  .slot-abbr {
+    font-size: 11px;
+  }
+  .slot-name {
+    font-size: 17px;
+  }
+  .slot-cat {
+    font-size: 7px;
+  }
+  .tab-btn {
+    padding: 8px 10px;
+    font-size: 8px;
   }
 }
 
