@@ -1,5 +1,5 @@
 export interface Quest {
-  k: "l" | "e" | "r";
+  k: "m" | "l" | "e" | "r";
   r: string;
   t: string;
   m: string;

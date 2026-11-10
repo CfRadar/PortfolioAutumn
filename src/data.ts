@@ -3,11 +3,11 @@ import type { Cert, Job, Quest, SideQuest, Stat, Win } from "./types";
 const GH = "https://github.com/CfRadar/";
 
 export const QUESTS: Quest[] = [
-  { k: "l", r: "LEGENDARY", t: "NovaCPP", m: "Framework development | May 2026 to now",
+  { k: "m", r: "MYTHIC", t: "NovaCPP", m: "Framework development | May 2026 to now",
     d: "A full-stack C++17 framework that compiles declarative UI components and REST routes into one executable. Hot reload in about 1 second over Server-Sent Events, SQLite WAL persistence, optional Redis sessions and native WinHTTP and OpenSSL transport.",
     s: "1,800+ npm downloads, 9 GitHub stars", g: ["C++17", "SSE", "SQLite WAL", "Redis", "CMake"],
     l: "https://nova-documentation.vercel.app/", n: "READ THE DOCS", c: GH + "NovaCPP" },
-  { k: "e", r: "EPIC", t: "NebulaOS", m: "Team lead, full-stack | June 2026",
+  { k: "l", r: "LEGENDARY", t: "NebulaOS", m: "Team lead, full-stack | June 2026",
     d: "An operating system in your browser: an in-memory virtual file system backed by MongoDB, a POSIX-like terminal with 10 commands, a code editor, a file manager and live multiplayer cursors over Socket.IO.",
     s: "Backend owner on a 2-person team", g: ["React", "Node.js", "MongoDB", "Socket.IO"],
     l: "https://nebula-os-sable.vercel.app/", n: "OPEN THE DEMO" },
@@ -23,7 +23,7 @@ export const QUESTS: Quest[] = [
     d: "A browser music player built on YouTube search and playback, with a persistent player that survives navigation. De-duplicated requests plus an in-memory cache cut repeat search API usage.",
     s: "90% fewer repeat API calls", g: ["YouTube API", "Caching", "React", "Node.js"],
     l: "https://y-melody.vercel.app/", n: "OPEN THE DEMO", c: GH + "Y-Melody" },
-  { k: "r", r: "RARE", t: "SoulDuel", m: "Full-stack and game logic | September 2026",
+  { k: "l", r: "LEGENDARY", t: "SoulDuel", m: "Full-stack and game logic | September 2026",
     d: "A real-time multiplayer boss arena in the browser: Socket.IO state sync, a modular Null Overseer boss engine with projectile, beam and hazard managers, JWT auth, leaderboards and time trials.",
     s: "Live matches, boss phases and rankings", g: ["React 19", "Socket.IO", "Node.js", "MongoDB"],
     c: GH + "soul-frontend" },
